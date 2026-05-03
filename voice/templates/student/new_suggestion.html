@@ -1,0 +1,468 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Suggestion – Mzumbe Voice</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #0b2b3b 0%, #1a4d5f 100%);
+            min-height: 100vh;
+        }
+        .drawer {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100%;
+            background: #f5f7fa;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+            transition: left 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        .drawer.open {
+            left: 0;
+        }
+        .drawer-header {
+            background: #1e6f5c;
+            padding: 24px 20px;
+            color: white;
+        }
+        .drawer-header .avatar {
+            width: 48px;
+            height: 48px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #1e6f5c;
+            margin-bottom: 12px;
+        }
+        .drawer-header h3 {
+            font-size: 1.2rem;
+            margin-bottom: 4px;
+        }
+        .drawer-header p {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        .drawer-menu {
+            padding: 8px 0;
+        }
+        .drawer-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: #2c3e50;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+        .drawer-menu a:hover {
+            background: #e2e8f0;
+            color: #1e6f5c;
+        }
+        .drawer-menu a.active {
+            background: #eef2f3;
+            color: #1e6f5c;
+            border-left: 4px solid #1e6f5c;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+            z-index: 999;
+        }
+        .overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        .main-content {
+            margin-left: 0;
+            transition: margin-left 0.3s;
+            min-height: 100vh;
+        }
+        .main-content.shifted {
+            margin-left: 280px;
+        }
+        .top-bar {
+            background: white;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .menu-icon {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #1e6f5c;
+        }
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo-area img {
+            max-height: 40px;
+        }
+        .title h2 {
+            font-size: 1.2rem;
+            color: #1e6f5c;
+        }
+        .user-menu {
+            position: relative;
+        }
+        .user-btn {
+            background: #1e6f5c;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .dropdown {
+            position: absolute;
+            right: 0;
+            top: 45px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            min-width: 150px;
+            display: none;
+            z-index: 10;
+        }
+        .dropdown a {
+            display: block;
+            padding: 10px 16px;
+            color: #2c3e50;
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+        .dropdown a:hover {
+            background: #f1f5f9;
+            color: #1e6f5c;
+        }
+        .dropdown.show {
+            display: block;
+        }
+        .form-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .form-card {
+            background: white;
+            border-radius: 28px;
+            padding: 32px;
+            box-shadow: 0 20px 35px -10px rgba(0,0,0,0.2);
+        }
+        .form-card h1 {
+            color: #1e6f5c;
+            margin-bottom: 8px;
+            font-size: 1.8rem;
+        }
+        .form-card .sub {
+            color: #5a6e7a;
+            margin-bottom: 28px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 12px;
+        }
+        .form-group {
+            margin-bottom: 22px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1e2a3e;
+            font-size: 0.9rem;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 28px;
+            font-size: 0.95rem;
+            background: #f8fafc;
+            transition: 0.2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #1e6f5c;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(30,111,92,0.15);
+        }
+        button[type="submit"] {
+            background: #1e6f5c;
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 100%;
+        }
+        button[type="submit"]:hover {
+            background: #0e4d3f;
+            transform: translateY(-2px);
+        }
+        .help-text {
+            font-size: 0.7rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            border-top: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            font-size: 0.8rem;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            text-align: center;
+            width: 100%;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 600px) {
+            .form-card { padding: 24px; }
+            .form-card h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="drawer" id="drawer">
+    <div class="drawer-header">
+        <div class="avatar">{{ request.user.username|first|upper }}</div>
+        <h3>{{ request.user.get_full_name|default:request.user.username }}</h3>
+        <p>Student</p>
+    </div>
+    <div class="drawer-menu">
+        <a href="{% url 'student_dashboard' %}">📊 Dashboard</a>
+        <a href="{% url 'student_dashboard' %}">📋 My Suggestions</a>
+        <a href="#" class="active">✍️ Submit Suggestion</a>
+        <a href="#" id="drawerProfile">👤 Profile</a>
+        <a href="#" id="drawerSettings">⚙️ Settings</a>
+        <a href="#" id="drawerLock">🔒 Lock Account</a>
+        <a href="#" id="drawerLogout">🚪 Logout</a>
+    </div>
+</div>
+<div class="overlay" id="overlay"></div>
+
+<div class="main-content" id="mainContent">
+    <div class="top-bar">
+        <button class="menu-icon" id="menuToggle">☰</button>
+        <div class="logo-area">
+            <img src="{% static 'images/logo.png' %}" alt="Mzumbe" onerror="this.style.display='none'">
+            <div class="title"><h2>🎓 Mzumbe Voice</h2></div>
+        </div>
+        <div class="user-menu">
+            <button class="user-btn" id="userBtn">👤 {{ request.user.username }} ▼</button>
+            <div class="dropdown" id="userDropdown">
+                <a id="userProfile">Profile</a>
+                <a id="userSettings">Settings</a>
+                <a id="userLock">Lock Account</a>
+                <a id="userLogout">Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-container">
+        <div class="form-card">
+            <h1>✍️ Submit a New Suggestion</h1>
+            <div class="sub">Your voice matters – share your feedback with the university</div>
+
+            <form id="suggestionForm" enctype="multipart/form-data" method="post" action="{% url 'submit_suggestion' %}">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label>📂 Category</label>
+                    <select name="category" required>
+                        <option value="academic">Academic</option>
+                         <option value="accommodation">accommodation</option>
+                        <option value="welfare">Welfare</option>
+                        <option value="gender">Gender Issue</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>💬 Description</label>
+                    <textarea name="description" rows="5" placeholder="Clearly describe your suggestion or concern..." required></textarea>
+                    <div class="help-text">Be specific and constructive.</div>
+                </div>
+
+                <div class="form-group">
+                    <label>🔒 Visibility</label>
+                    <select name="visibility" id="visibilitySelect">
+                        <option value="confidential">Confidential – only the Vice Chancellor will see it</option>
+                        <option value="open">Open – visible to the relevant faculty</option>
+                    </select>
+                </div>
+
+                <div id="facultyDiv" class="form-group" style="display: none;">
+                    <label>🏛️ Select Faculty <span style="color:red;">*</span></label>
+                    <select name="faculty" id="facultySelect">
+                        <option value="">-- Select Faculty --</option>
+                        <option value="Law">Faculty of Law</option>
+                        <option value="FST">Faculty of Science and Technology (FST)</option>
+                        <option value="SOB">School of Business (SOB)</option>
+                        <option value="SOPAM">School of Public Administration and Management (SOPAM)</option>
+                        <option value="IDS">Institute of Development Studies (IDS)</option>
+                        <option value="FSS">Faculty of Social Sciences (FSS)</option>
+                        <option value="accommodation">Accommodation</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>📎 Attachment (optional)</label>
+                    <input type="file" name="attachment" accept="image/*,video/*,.pdf,.doc,.docx">
+                    <div class="help-text">You can upload an image, document, or video (max 10MB).</div>
+                </div>
+
+                <button type="submit">🚀 Submit Suggestion</button>
+            </form>
+            <div id="submitMsg" style="margin-top: 20px; text-align: center; font-weight: 500;"></div>
+        </div>
+        <a href="{% url 'student_dashboard' %}" class="back-link">← Back to Dashboard</a>
+    </div>
+
+    <div class="footer">
+        <p>Governed by Mzumbe University</p>
+    </div>
+</div>
+
+<script>
+    // Drawer & overlay
+    const drawer = document.getElementById('drawer');
+    const overlay = document.getElementById('overlay');
+    const menuToggle = document.getElementById('menuToggle');
+    const mainContent = document.getElementById('mainContent');
+
+    function closeDrawer() {
+        drawer.classList.remove('open');
+        overlay.classList.remove('active');
+        mainContent.classList.remove('shifted');
+    }
+    function openDrawer() {
+        drawer.classList.add('open');
+        overlay.classList.add('active');
+        mainContent.classList.add('shifted');
+    }
+    menuToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (drawer.classList.contains('open')) closeDrawer();
+        else openDrawer();
+    });
+    overlay.addEventListener('click', closeDrawer);
+
+    // User dropdown
+    const userBtn = document.getElementById('userBtn');
+    const userDropdown = document.getElementById('userDropdown');
+    userBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        userDropdown.classList.toggle('show');
+    });
+    window.addEventListener('click', () => userDropdown.classList.remove('show'));
+
+    // Faculty visibility toggle & required attribute management
+    const visibilitySelect = document.getElementById('visibilitySelect');
+    const facultyDiv = document.getElementById('facultyDiv');
+    const facultySelect = document.getElementById('facultySelect');
+
+    function toggleFaculty() {
+        const isOpen = visibilitySelect.value === 'open';
+        facultyDiv.style.display = isOpen ? 'block' : 'none';
+        if (isOpen) {
+            facultySelect.setAttribute('required', 'required');
+        } else {
+            facultySelect.removeAttribute('required');
+            facultySelect.value = ''; // reset when hidden
+        }
+    }
+    visibilitySelect.addEventListener('change', toggleFaculty);
+    toggleFaculty(); // initial state
+
+    // AJAX form submission
+    const form = document.getElementById('suggestionForm');
+    const submitMsg = document.getElementById('submitMsg');
+    form.onsubmit = async (e) => {
+        e.preventDefault();
+        const fd = new FormData(form);
+        submitMsg.innerHTML = 'Submitting...';
+        try {
+            const res = await fetch(form.action, {
+                method: 'POST',
+                body: fd,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const data = await res.json();
+            if (data.ok) {
+                submitMsg.style.color = 'green';
+                submitMsg.innerHTML = '✅ ' + data.message;
+                setTimeout(() => {
+                    window.location.href = "{% url 'student_dashboard' %}";
+                }, 1500);
+            } else {
+                submitMsg.style.color = 'red';
+                submitMsg.innerHTML = '❌ ' + (data.message || 'Submission failed');
+            }
+        } catch (err) {
+            submitMsg.style.color = 'red';
+            submitMsg.innerHTML = '❌ Network error. Please try again.';
+        }
+    };
+
+    // Drawer actions (profile, settings, lock, logout)
+    function handleProfile() { alert(`Profile: {{ request.user.username }}\nEmail: {{ request.user.email }}`); }
+    function handleSettings() { alert('Settings will be available soon.'); }
+    function handleLock() { if(confirm('Lock your account? You will be logged out.')) window.location.href = "{% url 'student_lock' %}"; }
+    function handleLogout() { if(confirm('Logout?')) window.location.href = "{% url 'student_logout' %}"; }
+
+    document.getElementById('userProfile').onclick = handleProfile;
+    document.getElementById('userSettings').onclick = handleSettings;
+    document.getElementById('userLock').onclick = handleLock;
+    document.getElementById('userLogout').onclick = handleLogout;
+    document.getElementById('drawerProfile').onclick = (e) => { e.preventDefault(); handleProfile(); closeDrawer(); };
+    document.getElementById('drawerSettings').onclick = (e) => { e.preventDefault(); handleSettings(); closeDrawer(); };
+    document.getElementById('drawerLock').onclick = (e) => { e.preventDefault(); handleLock(); closeDrawer(); };
+    document.getElementById('drawerLogout').onclick = (e) => { e.preventDefault(); handleLogout(); closeDrawer(); };
+</script>
+</body>
+</html>

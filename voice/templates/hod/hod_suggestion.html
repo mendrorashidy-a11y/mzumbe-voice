@@ -1,0 +1,384 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suggestions – HOD | Mzumbe Voice</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: linear-gradient(135deg, #0b2b3b 0%, #1a4d5f 100%); min-height: 100vh; }
+        /* Drawer */
+        .drawer {
+            position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
+            background: #f5f7fa; box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+            transition: left 0.3s ease; z-index: 1000; overflow-y: auto;
+        }
+        .drawer.open { left: 0; }
+        .drawer-header {
+            background: #1e6f5c; padding: 24px 20px; color: white;
+        }
+        .drawer-header .avatar {
+            width: 48px; height: 48px; background: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; font-weight: bold; color: #1e6f5c; margin-bottom: 12px;
+        }
+        .drawer-header h3 { font-size: 1.2rem; margin-bottom: 4px; }
+        .drawer-header p { font-size: 0.8rem; opacity: 0.8; }
+        .drawer-menu { padding: 8px 0; }
+        .drawer-menu a {
+            display: flex; align-items: center; gap: 12px; padding: 12px 20px;
+            color: #2c3e50; text-decoration: none; font-weight: 500; transition: 0.2s; cursor: pointer;
+        }
+        .drawer-menu a:hover { background: #e2e8f0; color: #1e6f5c; }
+        .drawer-menu a.active { background: #eef2f3; color: #1e6f5c; border-left: 4px solid #1e6f5c; }
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); visibility: hidden; opacity: 0;
+            transition: 0.2s; z-index: 999;
+        }
+        .overlay.active { visibility: visible; opacity: 1; }
+        .main-content { margin-left: 0; transition: margin-left 0.3s; min-height: 100vh; }
+        .main-content.shifted { margin-left: 280px; }
+        .top-bar {
+            background: white; padding: 12px 24px; display: flex;
+            justify-content: space-between; align-items: center; flex-wrap: wrap;
+            gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .menu-icon { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #1e6f5c; }
+        .logo-area { display: flex; align-items: center; gap: 12px; }
+        .logo-area img { max-height: 40px; }
+        .title h2 { font-size: 1.2rem; color: #1e6f5c; }
+        .user-menu { position: relative; }
+        .user-btn {
+            background: #1e6f5c; color: white; border: none; padding: 6px 14px;
+            border-radius: 40px; cursor: pointer; font-weight: bold; display: flex;
+            align-items: center; gap: 8px;
+        }
+        .dropdown {
+            position: absolute; right: 0; top: 45px; background: white;
+            border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            min-width: 150px; display: none; z-index: 10;
+        }
+        .dropdown a { display: block; padding: 10px 16px; color: #2c3e50; text-decoration: none; font-size: 0.85rem; cursor: pointer; }
+        .dropdown a:hover { background: #f1f5f9; color: #1e6f5c; }
+        .dropdown.show { display: block; }
+        .refresh-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #1e6f5c; }
+        .dashboard-container { padding: 24px; max-width: 1200px; margin: 0 auto; }
+        /* Filter bar */
+        .filter-bar {
+            background: white; border-radius: 20px; padding: 15px 20px;
+            margin-bottom: 25px; display: flex; flex-wrap: wrap; gap: 15px;
+            align-items: center; justify-content: space-between;
+        }
+        .filter-group {
+            display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+        }
+        .filter-group input, .filter-group select {
+            padding: 6px 12px; border-radius: 30px; border: 1px solid #cbd5e1;
+            background: white;
+        }
+        .btn-filter {
+            background: #1e6f5c; color: white; border: none; padding: 6px 16px;
+            border-radius: 30px; cursor: pointer;
+        }
+        .suggestion-card {
+            background: white; border-radius: 24px; padding: 20px;
+            margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 6px solid #1e6f5c; position: relative;
+        }
+        .status {
+            display: inline-block; padding: 4px 12px; border-radius: 30px;
+            font-size: 0.7rem; font-weight: bold; margin-left: 8px;
+        }
+        .status-pending { background: #fef9c3; color: #854d0e; }
+        .status-forwarded { background: #dbeafe; color: #1e40af; }
+        .status-resolved { background: #dcfce7; color: #166534; }
+        .btn-sm {
+            background: #1e6f5c; color: white; border: none; padding: 6px 14px;
+            border-radius: 30px; cursor: pointer; font-size: 0.8rem; margin-right: 8px;
+        }
+        .btn-sm:hover { background: #0e4d3f; }
+        .btn-danger { background: #c0392b; }
+        .btn-danger:hover { background: #a93226; }
+        .forward-select {
+            padding: 6px 10px; border-radius: 30px; border: 1px solid #cbd5e1;
+            margin-right: 10px;
+        }
+        .feedback-textarea {
+            width: 100%; margin-top: 12px; padding: 8px;
+            border-radius: 20px; border: 1px solid #cbd5e1;
+        }
+        .footer {
+            text-align: center; margin-top: 40px; padding: 20px;
+            border-top: 1px solid rgba(255,255,255,0.3);
+            color: white; font-size: 0.8rem;
+        }
+        .back-to-dashboard {
+            display: inline-block; margin-bottom: 20px; background: #1e6f5c; color: white;
+            padding: 8px 20px; border-radius: 30px; text-decoration: none;
+        }
+        .action-buttons {
+            margin-top: 15px;
+        }
+        @media (max-width: 768px) {
+            .main-content.shifted { margin-left: 0; }
+            .drawer.open { left: 0; }
+            .filter-bar { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+<div class="drawer" id="drawer">
+    <div class="drawer-header">
+        <div class="avatar">{{ request.user.username|first|upper }}</div>
+        <h3>{{ request.user.get_full_name|default:request.user.username }}</h3>
+        <p>HOD – {{ faculty.name|default:"No Faculty Assigned" }}</p>
+    </div>
+    <div class="drawer-menu">
+        <a href="{% url 'hod_dashboard' faculty_name=faculty.name|lower %}">📊 Dashboard</a>
+        <a href="{% url 'hod_suggestions' faculty_name=faculty.name|lower %}" class="active">📋 Suggestions</a>
+        <a href="#" id="drawerProfile">👤 Profile</a>
+        <a href="#" id="drawerSettings">⚙️ Settings</a>
+        <a href="#" id="drawerLock">🔒 Lock Account</a>
+        <a href="#" id="drawerLogout">🚪 Logout</a>
+    </div>
+</div>
+<div class="overlay" id="overlay"></div>
+
+<div class="main-content" id="mainContent">
+    <div class="top-bar">
+        <button class="menu-icon" id="menuToggle">☰</button>
+        <div class="logo-area">
+            <img src="{% static 'images/logo.png' %}" alt="Mzumbe" onerror="this.style.display='none'">
+            <div class="title"><h2>📚 HOD – Suggestions</h2></div>
+        </div>
+        <div style="display: flex; gap: 12px;">
+            <button class="refresh-btn" id="refreshBtn">🔄</button>
+            <div class="user-menu">
+                <button class="user-btn" id="userBtn">👤 {{ request.user.username }} ▼</button>
+                <div class="dropdown" id="userDropdown">
+                    <a id="userProfile">Profile</a>
+                    <a id="userSettings">Settings</a>
+                    <a id="userLock">Lock Account</a>
+                    <a id="userLogout">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-container">
+        <a href="{% url 'hod_dashboard' faculty_name=faculty.name|lower %}" class="back-to-dashboard">← Back to Dashboard</a>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <div class="filter-group">
+                <input type="text" id="searchStudent" placeholder="Search by student name...">
+                <select id="filterCategory">
+                    <option value="">All Categories</option>
+                    <option value="academic">Academic</option>
+                    <option value="welfare">Welfare</option>
+                    <option value="gender">Gender Issue</option>
+                    <option value="other">Other</option>
+                </select>
+                <select id="filterStatus">
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="forwarded">Forwarded</option>
+                    <option value="resolved">Resolved</option>
+                </select>
+                <button class="btn-filter" id="applyFilter">Apply Filter</button>
+                <button class="btn-filter" id="resetFilter">Reset</button>
+            </div>
+        </div>
+
+        <div id="suggestionsContainer">
+            {% for sug in suggestions %}
+            <div class="suggestion-card" data-id="{{ sug.suggestion_id }}" data-student="{{ sug.student.get_full_name|default:sug.student.username|lower }}" data-category="{{ sug.category }}" data-status="{{ sug.status }}">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div><strong>#{{ sug.suggestion_id }}</strong> – {{ sug.get_category_display }}</div>
+                    <div><span class="status status-{{ sug.status }}">{{ sug.status|upper }}</span></div>
+                </div>
+                <div><strong>Student:</strong> {{ sug.student.get_full_name|default:sug.student.username }}</div>
+                <div><strong>Description:</strong> {{ sug.description }}</div>
+                <div><strong>Visibility:</strong> {% if sug.visibility == 'confidential' %}🔒 Confidential{% else %}🌍 Open ({{ sug.faculty.name }}){% endif %}</div>
+                <div><strong>Feedback:</strong> <span class="feedback-text">{{ sug.feedback|default:"—" }}</span></div>
+                {% if sug.attachment %}<div><a href="{{ sug.attachment.url }}" target="_blank">📎 View attachment</a></div>{% endif %}
+
+                <div class="action-buttons">
+                    {% if sug.status != 'resolved' %}
+                        <select class="forward-select" data-id="{{ sug.suggestion_id }}">
+                            <option value="">-- Forward to --</option>
+                            {% for target in forward_targets %}
+                            <option value="{{ target.id }}">{{ target.get_role_display }} – {{ target.get_full_name|default:target.username }}</option>
+                            {% endfor %}
+                        </select>
+                        <button class="btn-sm forward-btn" data-id="{{ sug.suggestion_id }}">↪ Forward</button>
+                        <button class="btn-sm resolve-btn" data-id="{{ sug.suggestion_id }}">✅ Resolve</button>
+                    {% endif %}
+                    <button class="btn-sm feedback-btn" data-id="{{ sug.suggestion_id }}">💬 Add Feedback</button>
+                    <a href="{% url 'hod_edit_suggestion' faculty_name=faculty.name|lower sug_id=sug.suggestion_id %}" class="btn-sm">✏️ Edit</a>
+                    <button class="btn-sm btn-danger delete-btn" data-id="{{ sug.suggestion_id }}">🗑️ Delete</button>
+                </div>
+                <div class="feedback-area" id="feedback-{{ sug.suggestion_id }}" style="display:none; margin-top: 10px;">
+                    <textarea rows="2" placeholder="Write feedback..." class="feedback-textarea"></textarea>
+                    <button class="btn-sm submit-feedback" data-id="{{ sug.suggestion_id }}">Submit Feedback</button>
+                </div>
+            </div>
+            {% empty %}
+            <div class="suggestion-card">No suggestions assigned to you.</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="footer">Governed by Mzumbe University</div>
+</div>
+
+<script>
+    // Drawer & overlay
+    const drawer = document.getElementById('drawer');
+    const overlay = document.getElementById('overlay');
+    const menuToggle = document.getElementById('menuToggle');
+    const mainContent = document.getElementById('mainContent');
+    function closeDrawer() { drawer.classList.remove('open'); overlay.classList.remove('active'); mainContent.classList.remove('shifted'); }
+    function openDrawer() { drawer.classList.add('open'); overlay.classList.add('active'); mainContent.classList.add('shifted'); }
+    menuToggle.addEventListener('click', (e) => { e.stopPropagation(); drawer.classList.contains('open') ? closeDrawer() : openDrawer(); });
+    overlay.addEventListener('click', closeDrawer);
+
+    const userBtn = document.getElementById('userBtn');
+    const userDropdown = document.getElementById('userDropdown');
+    userBtn.addEventListener('click', (e) => { e.stopPropagation(); userDropdown.classList.toggle('show'); });
+    window.addEventListener('click', () => userDropdown.classList.remove('show'));
+
+    document.getElementById('refreshBtn').onclick = () => location.reload();
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    async function forwardSuggestion(sugId, targetId) {
+        const res = await fetch(`/hod/forward/${sugId}/`, {
+            method: 'POST', headers: { 'X-CSRFToken': csrftoken, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ target_user_id: targetId })
+        });
+        const data = await res.json();
+        if (data.ok) { alert('Forwarded successfully'); location.reload(); }
+        else { alert('Error: ' + (data.error || 'Unknown')); }
+    }
+    async function resolveSuggestion(sugId) {
+        const res = await fetch(`/hod/resolve/${sugId}/`, {
+            method: 'POST', headers: { 'X-CSRFToken': csrftoken, 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+        if (data.ok) { alert('Resolved'); location.reload(); }
+        else { alert('Error: ' + (data.error || 'Unknown')); }
+    }
+    async function addFeedback(sugId, feedbackText) {
+        const res = await fetch(`/hod/feedback/${sugId}/`, {
+            method: 'POST', headers: { 'X-CSRFToken': csrftoken, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ feedback: feedbackText })
+        });
+        const data = await res.json();
+        if (data.ok) { alert('Feedback added'); location.reload(); }
+        else { alert('Error: ' + (data.error || 'Unknown')); }
+    }
+    async function deleteSuggestion(sugId) {
+        if (!confirm('Are you sure you want to delete this suggestion? This action cannot be undone.')) return;
+        const res = await fetch(`/hod/delete/${sugId}/`, {
+            method: 'POST', headers: { 'X-CSRFToken': csrftoken, 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+        if (data.ok) { alert('Deleted successfully'); location.reload(); }
+        else { alert('Error: ' + (data.error || 'Unknown')); }
+    }
+
+    // Event binding
+    document.querySelectorAll('.forward-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            const select = document.querySelector(`.forward-select[data-id="${id}"]`);
+            const targetId = select.value;
+            if (!targetId) { alert('Please select a target'); return; }
+            forwardSuggestion(id, targetId);
+        });
+    });
+    document.querySelectorAll('.resolve-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            if (confirm('Mark this suggestion as resolved?')) resolveSuggestion(id);
+        });
+    });
+    document.querySelectorAll('.feedback-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            const area = document.getElementById(`feedback-${id}`);
+            area.style.display = area.style.display === 'none' ? 'block' : 'none';
+        });
+    });
+    document.querySelectorAll('.submit-feedback').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            const textarea = document.querySelector(`#feedback-${id} .feedback-textarea`);
+            const msg = textarea.value.trim();
+            if (!msg) { alert('Please enter feedback'); return; }
+            addFeedback(id, msg);
+        });
+    });
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            deleteSuggestion(id);
+        });
+    });
+
+    // Filter functionality
+    const applyFilter = () => {
+        const searchTerm = document.getElementById('searchStudent').value.toLowerCase();
+        const category = document.getElementById('filterCategory').value;
+        const status = document.getElementById('filterStatus').value;
+        const cards = document.querySelectorAll('.suggestion-card');
+        cards.forEach(card => {
+            const studentName = card.dataset.student || '';
+            const cardCategory = card.dataset.category;
+            const cardStatus = card.dataset.status;
+            let show = true;
+            if (searchTerm && !studentName.includes(searchTerm)) show = false;
+            if (category && cardCategory !== category) show = false;
+            if (status && cardStatus !== status) show = false;
+            card.style.display = show ? 'block' : 'none';
+        });
+    };
+    document.getElementById('applyFilter').addEventListener('click', applyFilter);
+    document.getElementById('resetFilter').addEventListener('click', () => {
+        document.getElementById('searchStudent').value = '';
+        document.getElementById('filterCategory').value = '';
+        document.getElementById('filterStatus').value = '';
+        applyFilter();
+    });
+
+    function handleProfile() { alert(`Profile: {{ request.user.username }}\nEmail: {{ request.user.email }}`); }
+    function handleSettings() { alert('Settings page coming soon.'); }
+    function handleLock() { if(confirm('Lock your account?')) window.location.href = "{% url 'student_lock' %}"; }
+    function handleLogout() { if(confirm('Logout?')) window.location.href = "{% url 'student_logout' %}"; }
+    document.getElementById('userProfile').onclick = handleProfile;
+    document.getElementById('userSettings').onclick = handleSettings;
+    document.getElementById('userLock').onclick = handleLock;
+    document.getElementById('userLogout').onclick = handleLogout;
+    document.getElementById('drawerProfile').onclick = (e) => { e.preventDefault(); handleProfile(); closeDrawer(); };
+    document.getElementById('drawerSettings').onclick = (e) => { e.preventDefault(); handleSettings(); closeDrawer(); };
+    document.getElementById('drawerLock').onclick = (e) => { e.preventDefault(); handleLock(); closeDrawer(); };
+    document.getElementById('drawerLogout').onclick = (e) => { e.preventDefault(); handleLogout(); closeDrawer(); };
+</script>
+</body>
+</html>

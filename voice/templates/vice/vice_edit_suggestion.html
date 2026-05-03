@@ -1,0 +1,103 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Suggestion – VC | Mzumbe Voice</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: linear-gradient(135deg, #0b2b3b 0%, #1a4d5f 100%); min-height: 100vh; }
+        .container {
+            max-width: 800px; margin: 40px auto; background: white; border-radius: 28px;
+            padding: 30px; box-shadow: 0 20px 35px -10px rgba(0,0,0,0.2);
+        }
+        h1 { color: #1e6f5c; margin-bottom: 20px; font-size: 1.8rem; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; color: #1e2a3e; font-size: 0.9rem; }
+        input, select, textarea {
+            width: 100%; padding: 10px 16px; border: 1px solid #cbd5e1;
+            border-radius: 28px; font-size: 0.95rem; background: #f8fafc;
+            transition: 0.2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none; border-color: #1e6f5c; background: white; box-shadow: 0 0 0 2px rgba(30,111,92,0.15);
+        }
+        button {
+            background: #1e6f5c; color: white; border: none; padding: 10px 24px;
+            border-radius: 40px; font-weight: bold; cursor: pointer;
+            font-size: 0.9rem;
+        }
+        button:hover { background: #0e4d3f; }
+        .btn-secondary { background: #6c757d; margin-left: 10px; }
+        .btn-secondary:hover { background: #5a6268; }
+        .back-link { display: inline-block; margin-top: 20px; color: #1e6f5c; text-decoration: none; }
+        .back-link:hover { text-decoration: underline; }
+        .error { color: #e53e3e; background: #fff5f5; padding: 10px; border-radius: 28px; margin-top: 15px; font-size: 0.85rem; }
+        @media (max-width: 600px) {
+            .container { padding: 20px; margin: 20px; }
+            h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>✏️ Edit Suggestion #{{ suggestion.suggestion_id }}</h1>
+    <form method="post" action="{% url 'vice_update_suggestion' sug_id=suggestion.suggestion_id %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Category</label>
+            <select name="category" required>
+                {% for code, label in suggestion.CATEGORY_CHOICES %}
+                <option value="{{ code }}" {% if suggestion.category == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Description</label>
+            <textarea name="description" rows="5" required>{{ suggestion.description }}</textarea>
+        </div>
+        <div class="form-group">
+            <label>Visibility</label>
+            <select name="visibility" id="visibilitySelect" required>
+                <option value="confidential" {% if suggestion.visibility == 'confidential' %}selected{% endif %}>Confidential (VC only)</option>
+                <option value="open" {% if suggestion.visibility == 'open' %}selected{% endif %}>Open (to faculty)</option>
+            </select>
+        </div>
+        <div class="form-group" id="facultyDiv" style="{% if suggestion.visibility != 'open' %}display:none;{% endif %}">
+            <label>Faculty (for open suggestions)</label>
+            <select name="faculty">
+                <option value="">-- Select Faculty --</option>
+                {% for fac in faculties %}
+                <option value="{{ fac.id }}" {% if suggestion.faculty and suggestion.faculty.id == fac.id %}selected{% endif %}>{{ fac.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Feedback</label>
+            <textarea name="feedback" rows="3" placeholder="Add feedback or notes...">{{ suggestion.feedback|default:'' }}</textarea>
+        </div>
+        <div class="form-group">
+            <label>Status</label>
+            <select name="status">
+                <option value="pending" {% if suggestion.status == 'pending' %}selected{% endif %}>Pending</option>
+                <option value="forwarded" {% if suggestion.status == 'forwarded' %}selected{% endif %}>Forwarded</option>
+                <option value="resolved" {% if suggestion.status == 'resolved' %}selected{% endif %}>Resolved</option>
+            </select>
+        </div>
+        <button type="submit">Save Changes</button>
+        <a href="{% url 'vice_suggestions' %}" class="btn-secondary" style="padding: 10px 24px; text-decoration: none;">Cancel</a>
+    </form>
+    <a href="{% url 'vice_suggestions' %}" class="back-link">← Back to Suggestions</a>
+</div>
+<script>
+    const visibilitySelect = document.getElementById('visibilitySelect');
+    const facultyDiv = document.getElementById('facultyDiv');
+    function toggleFaculty() {
+        facultyDiv.style.display = visibilitySelect.value === 'open' ? 'block' : 'none';
+    }
+    visibilitySelect.addEventListener('change', toggleFaculty);
+    toggleFaculty(); // set initial state
+</script>
+</body>
+</html>

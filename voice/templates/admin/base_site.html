@@ -1,0 +1,51 @@
+{% extends "admin/base_site.html" %}
+{% load static i18n %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block branding %}
+<div class="logo-area" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+    <img src="{% static 'images/logo.png' %}" alt="Mzumbe Logo" style="max-height: 50px;">
+    <h1 id="site-name" style="margin:0; color: hsl(165, 40%, 98%); text-transform: uppercase;">MZUMBE VOICE MANAGEMENT</h1>
+    
+</div>
+{% endblock %}
+
+{% block userlinks %}
+    {# "View site" link is omitted #}
+    {% if user.is_active and user.is_staff %}
+        {% url 'django-admindocs-docroot' as docsroot %}
+        {% if docsroot %}
+            <a href="{{ docsroot }}">{% trans 'Documentation' %}</a>
+            <span class="separator">|</span>
+        {% endif %}
+        <a href="{% url 'admin:password_change' %}">{% trans 'Change password' %}</a>
+        <span class="separator">|</span>
+        {# Logout form instead of a simple GET link #}
+        <form action="{% url 'admin:logout' %}" method="post" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" style="background: none; border: none; color: #ffffff; cursor: pointer; padding: 0; font: inherit;">{% trans 'Log out' %}</button>
+        </form>
+    {% endif %}
+{% endblock %}
+
+{% block extrastyle %}
+<style>
+    #header {
+        background: #1e6f5c;
+        color: white;
+    }
+    .module h2, .module caption, .inline-group h2 {
+        background: #1e6f5c;
+    }
+    a:link, a:visited {
+        color: #1e6f5c;
+    }
+    .button, input[type=submit], input[type=button], .submit-row input {
+        background: #1e6f5c;
+    }
+    .button.default, input[type=submit].default {
+        background: #0e4d3f;
+    }
+</style>
+{% endblock %}

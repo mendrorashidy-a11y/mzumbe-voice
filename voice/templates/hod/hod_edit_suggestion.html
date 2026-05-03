@@ -1,0 +1,93 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Suggestion – HOD | Mzumbe Voice</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: linear-gradient(135deg, #0b2b3b 0%, #1a4d5f 100%); min-height: 100vh; }
+        .container {
+            max-width: 800px; margin: 40px auto; background: white; border-radius: 28px;
+            padding: 30px; box-shadow: 0 20px 35px -10px rgba(0,0,0,0.2);
+        }
+        h1 { color: #1e6f5c; margin-bottom: 20px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; color: #1e2a3e; }
+        input, select, textarea {
+            width: 100%; padding: 10px 16px; border: 1px solid #cbd5e1;
+            border-radius: 28px; font-size: 0.95rem; background: #f8fafc;
+        }
+        button {
+            background: #1e6f5c; color: white; border: none; padding: 10px 24px;
+            border-radius: 40px; font-weight: bold; cursor: pointer;
+        }
+        .btn-secondary { background: #6c757d; }
+        .btn-secondary:hover { background: #5a6268; }
+        .back-link { display: inline-block; margin-top: 20px; color: #1e6f5c; text-decoration: none; }
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>✏️ Edit Suggestion #{{ suggestion.suggestion_id }}</h1>
+    <form method="post" action="{% url 'hod_update_suggestion' faculty_name=faculty.name|lower sug_id=suggestion.suggestion_id %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Category</label>
+            <select name="category" required>
+                <option value="academic" {% if suggestion.category == 'academic' %}selected{% endif %}>Academic</option>
+                <option value="welfare" {% if suggestion.category == 'welfare' %}selected{% endif %}>Welfare</option>
+                <option value="gender" {% if suggestion.category == 'gender' %}selected{% endif %}>Gender Issue</option>
+                <option value="other" {% if suggestion.category == 'other' %}selected{% endif %}>Other</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Description</label>
+            <textarea name="description" rows="4" required>{{ suggestion.description }}</textarea>
+        </div>
+        <div class="form-group">
+            <label>Visibility</label>
+            <select name="visibility" required>
+                <option value="confidential" {% if suggestion.visibility == 'confidential' %}selected{% endif %}>Confidential (VC only)</option>
+                <option value="open" {% if suggestion.visibility == 'open' %}selected{% endif %}>Open (to faculty)</option>
+            </select>
+        </div>
+        <div class="form-group" id="facultyDiv" style="{% if suggestion.visibility != 'open' %}display:none;{% endif %}">
+            <label>Faculty</label>
+            <select name="faculty">
+                <option value="">-- Select Faculty --</option>
+                {% for fac in faculties %}
+                <option value="{{ fac.id }}" {% if suggestion.faculty and suggestion.faculty.id == fac.id %}selected{% endif %}>{{ fac.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Feedback</label>
+            <textarea name="feedback" rows="3">{{ suggestion.feedback|default:'' }}</textarea>
+        </div>
+        <div class="form-group">
+            <label>Status</label>
+            <select name="status">
+                <option value="pending" {% if suggestion.status == 'pending' %}selected{% endif %}>Pending</option>
+                <option value="forwarded" {% if suggestion.status == 'forwarded' %}selected{% endif %}>Forwarded</option>
+                <option value="resolved" {% if suggestion.status == 'resolved' %}selected{% endif %}>Resolved</option>
+            </select>
+        </div>
+        <button type="submit">Save Changes</button>
+        <a href="{% url 'hod_suggestions' faculty_name=faculty.name|lower %}" class="btn-secondary" style="padding: 10px 24px; text-decoration: none; margin-left: 10px;">Cancel</a>
+    </form>
+    <a href="{% url 'hod_suggestions' faculty_name=faculty.name|lower %}" class="back-link">← Back to Suggestions</a>
+</div>
+<script>
+    const visibilitySelect = document.querySelector('select[name="visibility"]');
+    const facultyDiv = document.getElementById('facultyDiv');
+    function toggleFaculty() {
+        facultyDiv.style.display = visibilitySelect.value === 'open' ? 'block' : 'none';
+    }
+    visibilitySelect.addEventListener('change', toggleFaculty);
+    toggleFaculty();
+</script>
+</body>
+</html>

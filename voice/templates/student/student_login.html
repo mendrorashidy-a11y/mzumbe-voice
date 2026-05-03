@@ -1,0 +1,55 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Login – Mzumbe Voice</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
+        body{background:linear-gradient(135deg,#0b2b3b,#1a4d5f);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:16px}
+        .card{background:#fff;border-radius:28px;width:380px;max-width:100%;padding:24px 22px;box-shadow:0 20px 40px -12px rgba(0,0,0,0.35);text-align:center}
+        .logo-area img{max-height:48px;margin-bottom:12px}
+        h1{font-size:1.6rem;color:#1e6f5c;margin-bottom:4px}
+        .sub{color:#5a6e7a;font-size:0.75rem;margin-bottom:20px;border-bottom:1px solid #e2e8f0;display:inline-block;padding-bottom:4px}
+        .input-group{text-align:left;margin-bottom:14px}
+        .input-group label{display:block;font-weight:600;margin-bottom:4px;color:#1e2a3e;font-size:0.7rem}
+        input{width:100%;padding:8px 12px;border:1px solid #cbd5e1;border-radius:24px;font-size:0.85rem;background:#f8fafc}
+        input:focus{outline:none;border-color:#1e6f5c;box-shadow:0 0 0 2px rgba(30,111,92,0.15)}
+        button{width:100%;background:#1e6f5c;color:#fff;border:none;padding:8px;border-radius:32px;font-weight:bold;font-size:0.85rem;cursor:pointer;margin-top:8px}
+        button:hover{background:#0e4d3f}
+        .error{color:#e53e3e;background:#fff5f5;padding:6px;border-radius:20px;margin:12px 0;font-size:0.7rem}
+        .links{display:flex;justify-content:space-between;font-size:0.7rem;margin:12px 0 8px}
+        .links a{color:#1e6f5c;text-decoration:none}
+        .links a:hover{text-decoration:underline}
+        .footer-note{font-size:0.6rem;color:#7f8c8d;border-top:1px solid #edf2f7;padding-top:12px;margin-top:12px}
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="logo-area"><img src="{% static 'images/logo.png' %}" alt="Mzumbe"></div>
+    <h1>🎓 STUDENT LOGIN</h1>
+    <div class="sub">Mzumbe Voice – Student Portal</div>
+
+    <form method="post" action="{% url 'student_login' %}">
+        {% csrf_token %}
+        <div class="input-group"><label>📛 Username</label><input type="text" name="username" required autofocus></div>
+        <div class="input-group"><label>🔒 Password</label><input type="password" name="password" required></div>
+        <button type="submit">LOGIN TO DASHBOARD</button>
+        {% if error %}<div class="error">{{ error }}</div>{% endif %}
+    </form>
+
+    <div class="links">
+        <a href="{% url 'home' %}">← Back to Home</a>
+        <a href="#" id="forgotPwd">Forgot Password?</a>
+    </div>
+    <div class="footer-note">🔐 Demo: student / pass123 (for testing)<br>Registered Mzumbe students only</div>
+</div>
+<script>
+    document.getElementById('forgotPwd').onclick = (e) => {
+        e.preventDefault();
+        alert('Contact ICT department at Mzumbe University to reset your password.');
+    };
+</script>
+</body>
+</html>

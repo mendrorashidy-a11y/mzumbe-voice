@@ -1,0 +1,220 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us – Mzumbe University | Student Voice</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #0b2b3b 0%, #1a4d5f 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        .top-nav {
+            background: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .logo-area img {
+            max-height: 50px;
+            width: auto;
+        }
+        .logo-area span {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #1e6f5c;
+        }
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .nav-links a {
+            text-decoration: none;
+            color: #1e6f5c;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 40px;
+            transition: 0.2s;
+        }
+        .nav-links a:hover {
+            background: #eef2f3;
+            color: #0e4d3f;
+        }
+        .hero {
+            background: #1e6f5c;
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        .content {
+            padding: 40px;
+        }
+        .contact-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin: 30px 0;
+        }
+        .contact-card {
+            background: #f5f7fa;
+            padding: 25px;
+            border-radius: 20px;
+            text-align: center;
+        }
+        .contact-card h3 {
+            color: #1e6f5c;
+            margin-bottom: 15px;
+        }
+        .contact-card p {
+            margin: 8px 0;
+            color: #334155;
+        }
+        .map {
+            margin-top: 30px;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        footer {
+            background: #eef2f3;
+            padding: 30px 20px;
+            font-size: 0.85rem;
+            color: #555;
+            text-align: center;
+        }
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .social-links a {
+            color: #1e6f5c;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .social-links a:hover {
+            color: #0e4d3f;
+            text-decoration: underline;
+        }
+        .contact-info {
+            margin-top: 15px;
+            line-height: 1.6;
+        }
+        hr {
+            margin: 15px auto;
+            width: 60px;
+            border: 0;
+            height: 1px;
+            background: #ccc;
+        }
+        @media (max-width: 700px) {
+            .hero h1 { font-size: 1.8rem; }
+            .content { padding: 20px; }
+            .top-nav { flex-direction: column; gap: 15px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="top-nav">
+        <div class="logo-area">
+            <img src="{% static 'images/logo.png' %}" alt="Mzumbe University Logo" onerror="this.style.display='none'">
+            <span>Mzumbe University</span>
+        </div>
+        <div class="nav-links">
+            <a href="{% url 'home' %}">🏠 Home</a>
+            <a href="{% url 'about' %}">📖 About</a>
+            <a href="{% url 'contact' %}">📞 Contact</a>
+            <a href="{% url 'staff_login' %}">👔 Staff Login</a>
+        </div>
+    </div>
+    
+    <div class="hero">
+        <h1>📞 Contact Us</h1>
+        <p>We’re here to help – reach out anytime</p>
+    </div>
+    
+    <div class="content">
+        <div class="contact-details">
+            <div class="contact-card">
+                <h3>📍 Main Campus</h3>
+                <p>Mzumbe University, P.O. Box 1,<br>Mzumbe, Morogoro, Tanzania</p>
+            </div>
+            <div class="contact-card">
+                <h3>📞 Phone</h3>
+                <p>+255 23 260 4380</p>
+                <p>+255 23 260 4381</p>
+            </div>
+            <div class="contact-card">
+                <h3>✉️ Email</h3>
+                <p>info@mzumbe.ac.tz</p>
+                <p>studentvoice@mzumbe.ac.tz</p>
+            </div>
+            <div class="contact-card">
+                <h3>🕒 Support Hours</h3>
+                <p>Monday – Friday: 8:00 AM – 5:00 PM<br>Saturday: 9:00 AM – 1:00 PM</p>
+            </div>
+        </div>
+        
+        <div class="map">
+            <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3958.729125612501!2d37.54025631477508!3d-7.190139394882289!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1841485c9c0e3d0b%3A0x4d68b7f096b6e69c!2sMzumbe%20University!5e0!3m2!1sen!2stz!4v1650000000000!5m2!1sen!2stz" 
+                width="100%" 
+                height="350" 
+                style="border:0;" 
+                allowfullscreen="" 
+                loading="lazy">
+            </iframe>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="social-links">
+            <a href="https://facebook.com/mzumbeuniversity" target="_blank">📘 Facebook</a>
+            <a href="https://instagram.com/mzumbeuniversity" target="_blank">📷 Instagram</a>
+            <a href="mailto:studentvoice@mzumbe.ac.tz">✉️ Email</a>
+            <a href="tel:+255123456789">📞 Phone +255 123 456 789</a>
+        </div>
+        <div class="contact-info">
+            <strong>Support:</strong> <a href="mailto:support@mzumbe.ac.tz">support@mzumbe.ac.tz</a>
+        </div>
+        <hr>
+        <p>&copy; 2025 Mzumbe University – All suggestions are handled according to university policy.</p>
+    </footer>
+</div>
+</body>
+</html>

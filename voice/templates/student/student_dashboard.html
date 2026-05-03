@@ -1,0 +1,477 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard – Mzumbe Voice</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #0b2b3b 0%, #1a4d5f 100%);
+            min-height: 100vh;
+        }
+        /* Sidebar (drawer) */
+        .drawer {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100%;
+            background: #f5f7fa;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+            transition: left 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        .drawer.open {
+            left: 0;
+        }
+        .drawer-header {
+            background: #1e6f5c;
+            padding: 24px 20px;
+            color: white;
+        }
+        .drawer-header .avatar {
+            width: 48px;
+            height: 48px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #1e6f5c;
+            margin-bottom: 12px;
+        }
+        .drawer-header h3 {
+            font-size: 1.2rem;
+            margin-bottom: 4px;
+        }
+        .drawer-header p {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        .drawer-menu {
+            padding: 8px 0;
+        }
+        .drawer-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: #2c3e50;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+        .drawer-menu a:hover {
+            background: #e2e8f0;
+            color: #1e6f5c;
+        }
+        .drawer-menu a.active {
+            background: #eef2f3;
+            color: #1e6f5c;
+            border-left: 4px solid #1e6f5c;
+        }
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+            z-index: 999;
+        }
+        .overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        /* Main content */
+        .main-content {
+            margin-left: 0;
+            transition: margin-left 0.3s;
+            min-height: 100vh;
+        }
+        .main-content.shifted {
+            margin-left: 280px;
+        }
+        /* Top bar */
+        .top-bar {
+            background: white;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .menu-icon {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #1e6f5c;
+            display: flex;
+            align-items: center;
+        }
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo-area img {
+            max-height: 40px;
+        }
+        .title h2 {
+            font-size: 1.2rem;
+            color: #1e6f5c;
+        }
+        .user-menu {
+            position: relative;
+        }
+        .user-btn {
+            background: #1e6f5c;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .dropdown {
+            position: absolute;
+            right: 0;
+            top: 45px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            min-width: 150px;
+            display: none;
+            z-index: 10;
+        }
+        .dropdown a {
+            display: block;
+            padding: 10px 16px;
+            color: #2c3e50;
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+        .dropdown a:hover {
+            background: #f1f5f9;
+            color: #1e6f5c;
+        }
+        .dropdown.show {
+            display: block;
+        }
+        .refresh-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #1e6f5c;
+        }
+        /* Cards & content */
+        .dashboard-container {
+            padding: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 16px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+        }
+        .stat-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #1e6f5c;
+        }
+        .stat-label {
+            font-size: 0.8rem;
+            color: #5a6e7a;
+        }
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 32px;
+            justify-content: center;
+        }
+        .btn-primary {
+            background: #1e6f5c;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary:hover {
+            background: #0e4d3f;
+            transform: translateY(-2px);
+        }
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .card h3 {
+            color: #1e6f5c;
+            margin-bottom: 16px;
+            font-size: 1.2rem;
+        }
+        .suggestion-item {
+            background: #f9f9f9;
+            border-left: 4px solid #1e6f5c;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+        }
+        .status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+        .status-pending { background: #fef9c3; color: #854d0e; }
+        .status-resolved { background: #dcfce7; color: #166534; }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            border-top: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            font-size: 0.9rem;
+        }
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .main-content.shifted { margin-left: 0; }
+            .drawer.open { left: 0; }
+        }
+    </style>
+</head>
+<body>
+<div class="drawer" id="drawer">
+    <div class="drawer-header">
+        <div class="avatar">{{ request.user.username|first|upper }}</div>
+        <h3>{{ request.user.get_full_name|default:request.user.username }}</h3>
+        <p>Student</p>
+    </div>
+    <div class="drawer-menu">
+        <a href="#" class="active" data-page="dashboard">📊 Dashboard</a>
+        <a href="#" data-page="suggestions">📋 My Suggestions</a>
+        <a href="{% url 'new_suggestion' %}">✍️ Submit Suggestion</a>
+        <a href="#" id="drawerProfile">👤 Profile</a>
+        <a href="#" id="drawerSettings">⚙️ Settings</a>
+        <a href="#" id="drawerLock">🔒 Lock Account</a>
+        <a href="#" id="drawerLogout">🚪 Logout</a>
+    </div>
+</div>
+<div class="overlay" id="overlay"></div>
+
+<div class="main-content" id="mainContent">
+    <div class="top-bar">
+        <button class="menu-icon" id="menuToggle">☰</button>
+        <div class="logo-area">
+            <img src="{% static 'images/logo.png' %}" alt="Mzumbe" onerror="this.style.display='none'">
+            <div class="title"><h2>🎓 Mzumbe Voice</h2></div>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <button class="refresh-btn" id="refreshBtn">🔄</button>
+            <div class="user-menu">
+                <button class="user-btn" id="userBtn">👤 {{ request.user.username }} ▼</button>
+                <div class="dropdown" id="userDropdown">
+                    <a id="userProfile">Profile</a>
+                    <a id="userSettings">Settings</a>
+                    <a id="userLock">Lock Account</a>
+                    <a id="userLogout">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-container" id="dashboardContainer">
+        <!-- Dashboard view (default) -->
+        <div id="dashboardView">
+            <div class="stats-grid">
+                <div class="stat-card" data-view="suggestions">
+                    <div class="stat-icon">📝</div>
+                    <div class="stat-value">{{ total_submitted|default:0 }}</div>
+                    <div class="stat-label">Total Suggestions</div>
+                </div>
+                <div class="stat-card" data-view="suggestions">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-value">{{ pending_count|default:0 }}</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+                <div class="stat-card" data-view="suggestions">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-value">{{ resolved_count|default:0 }}</div>
+                    <div class="stat-label">Resolved</div>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <a href="{% url 'new_suggestion' %}" class="btn-primary">📝 Submit New Suggestion</a>
+                <button class="btn-primary" id="viewSuggestionsBtn">📋 View My Suggestions</button>
+            </div>
+            <div class="card">
+                <h3>📊 Your Overview</h3>
+                <p>Welcome to Mzumbe Voice – your platform to share feedback with the university administration. Submit suggestions, track their status, and help improve our community.</p>
+            </div>
+        </div>
+
+        <!-- My Suggestions view -->
+        <div id="suggestionsView" style="display: none;">
+            <div class="card">
+                <h3>📋 My Suggestions</h3>
+                <div id="suggestionsList">
+                    {% for sug in suggestions %}
+                    <div class="suggestion-item">
+                        <strong>{{ sug.get_category_display }}</strong><br>
+                        {{ sug.description }}<br>
+                        Status: <span class="status status-{{ sug.status }}">{{ sug.status }}</span><br>
+                        Feedback: {{ sug.feedback|default:"Awaiting response" }}
+                        {% if sug.attachment %}<br><a href="{{ sug.attachment.url }}" target="_blank">📎 View Attachment</a>{% endif %}
+                    </div>
+                    {% empty %}
+                    <p>No suggestions yet. <a href="{% url 'new_suggestion' %}">Click here</a> to submit one.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Governed by Mzumbe University</p>
+    </div>
+</div>
+
+<script>
+    // DOM elements
+    const drawer = document.getElementById('drawer');
+    const overlay = document.getElementById('overlay');
+    const menuToggle = document.getElementById('menuToggle');
+    const mainContent = document.getElementById('mainContent');
+    const refreshBtn = document.getElementById('refreshBtn');
+
+    function closeDrawer() {
+        drawer.classList.remove('open');
+        overlay.classList.remove('active');
+        mainContent.classList.remove('shifted');
+    }
+    function openDrawer() {
+        drawer.classList.add('open');
+        overlay.classList.add('active');
+        mainContent.classList.add('shifted');
+    }
+    menuToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (drawer.classList.contains('open')) closeDrawer();
+        else openDrawer();
+    });
+    overlay.addEventListener('click', closeDrawer);
+
+    // Toggle user dropdown
+    const userBtn = document.getElementById('userBtn');
+    const userDropdown = document.getElementById('userDropdown');
+    userBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        userDropdown.classList.toggle('show');
+    });
+    window.addEventListener('click', () => userDropdown.classList.remove('show'));
+
+    // Page navigation (only dashboard vs suggestions)
+    const dashboardView = document.getElementById('dashboardView');
+    const suggestionsView = document.getElementById('suggestionsView');
+    const viewSuggestionsBtn = document.getElementById('viewSuggestionsBtn');
+    const statCards = document.querySelectorAll('.stat-card');
+
+    function showView(view) {
+        dashboardView.style.display = 'none';
+        suggestionsView.style.display = 'none';
+        if (view === 'dashboard') dashboardView.style.display = 'block';
+        else if (view === 'suggestions') suggestionsView.style.display = 'block';
+        // update drawer active style
+        document.querySelectorAll('.drawer-menu a[data-page]').forEach(link => link.classList.remove('active'));
+        if (view === 'dashboard') {
+            document.querySelector('.drawer-menu a[data-page="dashboard"]').classList.add('active');
+        } else if (view === 'suggestions') {
+            document.querySelector('.drawer-menu a[data-page="suggestions"]').classList.add('active');
+        }
+        closeDrawer();
+    }
+
+    viewSuggestionsBtn.addEventListener('click', () => showView('suggestions'));
+    statCards.forEach(card => {
+        card.addEventListener('click', () => {
+            const target = card.getAttribute('data-view');
+            if (target === 'suggestions') showView('suggestions');
+        });
+    });
+    document.querySelectorAll('.drawer-menu a[data-page]').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const page = link.getAttribute('data-page');
+            if (page === 'dashboard') showView('dashboard');
+            else if (page === 'suggestions') showView('suggestions');
+        });
+    });
+
+    // Refresh stats
+    refreshBtn.addEventListener('click', () => window.location.reload());
+
+    // Dropdown and drawer actions (profile, settings, lock, logout)
+    function handleProfile() { alert(`Profile: {{ request.user.username }}\nEmail: {{ request.user.email }}`); }
+    function handleSettings() { alert('Settings will be available soon.'); }
+    function handleLock() { if(confirm('Lock your account? You will be logged out.')) window.location.href = "{% url 'student_lock' %}"; }
+    function handleLogout() { if(confirm('Logout?')) window.location.href = "{% url 'student_logout' %}"; }
+
+    document.getElementById('userProfile').onclick = handleProfile;
+    document.getElementById('userSettings').onclick = handleSettings;
+    document.getElementById('userLock').onclick = handleLock;
+    document.getElementById('userLogout').onclick = handleLogout;
+    document.getElementById('drawerProfile').onclick = (e) => { e.preventDefault(); handleProfile(); closeDrawer(); };
+    document.getElementById('drawerSettings').onclick = (e) => { e.preventDefault(); handleSettings(); closeDrawer(); };
+    document.getElementById('drawerLock').onclick = (e) => { e.preventDefault(); handleLock(); closeDrawer(); };
+    document.getElementById('drawerLogout').onclick = (e) => { e.preventDefault(); handleLogout(); closeDrawer(); };
+</script>
+</body>
+</html>

@@ -1,0 +1,192 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accommodation Dashboard – Mzumbe Voice</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: linear-gradient(135deg, #0b2b3b 0%, #1a4d5f 100%); min-height: 100vh; }
+        /* Drawer */
+        .drawer {
+            position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
+            background: #f5f7fa; box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+            transition: left 0.3s ease; z-index: 1000; overflow-y: auto;
+        }
+        .drawer.open { left: 0; }
+        .drawer-header {
+            background: #1e6f5c; padding: 24px 20px; color: white;
+        }
+        .drawer-header .avatar {
+            width: 48px; height: 48px; background: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; font-weight: bold; color: #1e6f5c; margin-bottom: 12px;
+        }
+        .drawer-header h3 { font-size: 1.2rem; margin-bottom: 4px; }
+        .drawer-header p { font-size: 0.8rem; opacity: 0.8; }
+        .drawer-menu { padding: 8px 0; }
+        .drawer-menu a {
+            display: flex; align-items: center; gap: 12px; padding: 12px 20px;
+            color: #2c3e50; text-decoration: none; font-weight: 500; transition: 0.2s; cursor: pointer;
+        }
+        .drawer-menu a:hover { background: #e2e8f0; color: #1e6f5c; }
+        .drawer-menu a.active { background: #eef2f3; color: #1e6f5c; border-left: 4px solid #1e6f5c; }
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); visibility: hidden; opacity: 0;
+            transition: 0.2s; z-index: 999;
+        }
+        .overlay.active { visibility: visible; opacity: 1; }
+        .main-content { margin-left: 0; transition: margin-left 0.3s; min-height: 100vh; }
+        .main-content.shifted { margin-left: 280px; }
+        /* Top bar */
+        .top-bar {
+            background: white; padding: 12px 24px; display: flex;
+            justify-content: space-between; align-items: center; flex-wrap: wrap;
+            gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .menu-icon { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #1e6f5c; }
+        .logo-area { display: flex; align-items: center; gap: 12px; }
+        .logo-area img { max-height: 40px; }
+        .title h2 { font-size: 1.2rem; color: #1e6f5c; }
+        .user-menu { position: relative; }
+        .user-btn {
+            background: #1e6f5c; color: white; border: none; padding: 6px 14px;
+            border-radius: 40px; cursor: pointer; font-weight: bold; display: flex;
+            align-items: center; gap: 8px;
+        }
+        .dropdown {
+            position: absolute; right: 0; top: 45px; background: white;
+            border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            min-width: 150px; display: none; z-index: 10;
+        }
+        .dropdown a { display: block; padding: 10px 16px; color: #2c3e50; text-decoration: none; font-size: 0.85rem; cursor: pointer; }
+        .dropdown a:hover { background: #f1f5f9; color: #1e6f5c; }
+        .dropdown.show { display: block; }
+        .refresh-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #1e6f5c; }
+        /* Dashboard content */
+        .dashboard-container { padding: 24px; max-width: 1200px; margin: 0 auto; }
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px; margin-bottom: 32px;
+        }
+        .stat-card {
+            background: white; border-radius: 20px; padding: 16px;
+            text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-4px); }
+        .stat-icon { font-size: 32px; margin-bottom: 8px; }
+        .stat-value { font-size: 28px; font-weight: bold; color: #1e6f5c; }
+        .stat-label { font-size: 0.8rem; color: #5a6e7a; }
+        .btn-sm {
+            background: #1e6f5c; color: white; border: none; padding: 6px 14px;
+            border-radius: 30px; cursor: pointer; font-size: 0.8rem;
+            text-decoration: none; display: inline-block;
+        }
+        .btn-sm:hover { background: #0e4d3f; }
+        .footer {
+            text-align: center; margin-top: 40px; padding: 20px;
+            border-top: 1px solid rgba(255,255,255,0.3);
+            color: white; font-size: 0.8rem;
+        }
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .main-content.shifted { margin-left: 0; }
+            .drawer.open { left: 0; }
+        }
+    </style>
+</head>
+<body>
+<div class="drawer" id="drawer">
+    <div class="drawer-header">
+        <div class="avatar">{{ request.user.username|first|upper }}</div>
+        <h3>{{ request.user.get_full_name|default:request.user.username }}</h3>
+        <p>Director of Accommodation</p>
+    </div>
+    <div class="drawer-menu">
+        <a href="#" class="active" data-page="dashboard">📊 Dashboard</a>
+        <a href="{% url 'accommodation_suggestions' %}">📋 Suggestions</a>
+        <a href="#" id="drawerProfile">👤 Profile</a>
+        <a href="#" id="drawerSettings">⚙️ Settings</a>
+        <a href="#" id="drawerLock">🔒 Lock Account</a>
+        <a href="#" id="drawerLogout">🚪 Logout</a>
+    </div>
+</div>
+<div class="overlay" id="overlay"></div>
+
+<div class="main-content" id="mainContent">
+    <div class="top-bar">
+        <button class="menu-icon" id="menuToggle">☰</button>
+        <div class="logo-area">
+            <img src="{% static 'images/logo.png' %}" alt="Mzumbe" onerror="this.style.display='none'">
+            <div class="title"><h2>🏠 Accommodation Portal – Mzumbe Voice</h2></div>
+        </div>
+        <div style="display: flex; gap: 12px;">
+            <button class="refresh-btn" id="refreshBtn">🔄</button>
+            <div class="user-menu">
+                <button class="user-btn" id="userBtn">👤 {{ request.user.username }} ▼</button>
+                <div class="dropdown" id="userDropdown">
+                    <a id="userProfile">Profile</a>
+                    <a id="userSettings">Settings</a>
+                    <a id="userLock">Lock Account</a>
+                    <a id="userLogout">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-container">
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-value">{{ total_assigned }}</div><div class="stat-label">Assigned</div></div>
+            <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-value">{{ pending_count }}</div><div class="stat-label">Pending</div></div>
+            <div class="stat-card"><div class="stat-icon">📤</div><div class="stat-value">{{ forwarded_count }}</div><div class="stat-label">Forwarded</div></div>
+            <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-value">{{ resolved_count }}</div><div class="stat-label">Resolved</div></div>
+        </div>
+
+        <div class="stat-card" style="background: white; text-align: center; padding: 30px;">
+            <div class="stat-icon">📋</div>
+            <div style="font-size: 1.2rem; margin: 10px 0;">Manage Accommodation Suggestions</div>
+            <a href="{% url 'accommodation_suggestions' %}" class="btn-sm" style="display: inline-block; background: #1e6f5c; color: white; padding: 8px 20px; border-radius: 30px; text-decoration: none;">View All Suggestions →</a>
+        </div>
+    </div>
+    <div class="footer">Governed by Mzumbe University</div>
+</div>
+
+<script>
+    // Drawer & overlay
+    const drawer = document.getElementById('drawer');
+    const overlay = document.getElementById('overlay');
+    const menuToggle = document.getElementById('menuToggle');
+    const mainContent = document.getElementById('mainContent');
+    function closeDrawer() { drawer.classList.remove('open'); overlay.classList.remove('active'); mainContent.classList.remove('shifted'); }
+    function openDrawer() { drawer.classList.add('open'); overlay.classList.add('active'); mainContent.classList.add('shifted'); }
+    menuToggle.addEventListener('click', (e) => { e.stopPropagation(); drawer.classList.contains('open') ? closeDrawer() : openDrawer(); });
+    overlay.addEventListener('click', closeDrawer);
+
+    // User dropdown
+    const userBtn = document.getElementById('userBtn');
+    const userDropdown = document.getElementById('userDropdown');
+    userBtn.addEventListener('click', (e) => { e.stopPropagation(); userDropdown.classList.toggle('show'); });
+    window.addEventListener('click', () => userDropdown.classList.remove('show'));
+
+    // Refresh button
+    document.getElementById('refreshBtn').onclick = () => location.reload();
+
+    // Drawer actions (profile, settings, lock, logout)
+    function handleProfile() { alert(`Profile: {{ request.user.username }}\nEmail: {{ request.user.email }}`); }
+    function handleSettings() { alert('Settings page coming soon.'); }
+    function handleLock() { if(confirm('Lock your account?')) window.location.href = "{% url 'student_lock' %}"; }
+    function handleLogout() { if(confirm('Logout?')) window.location.href = "{% url 'student_logout' %}"; }
+    document.getElementById('userProfile').onclick = handleProfile;
+    document.getElementById('userSettings').onclick = handleSettings;
+    document.getElementById('userLock').onclick = handleLock;
+    document.getElementById('userLogout').onclick = handleLogout;
+    document.getElementById('drawerProfile').onclick = (e) => { e.preventDefault(); handleProfile(); closeDrawer(); };
+    document.getElementById('drawerSettings').onclick = (e) => { e.preventDefault(); handleSettings(); closeDrawer(); };
+    document.getElementById('drawerLock').onclick = (e) => { e.preventDefault(); handleLock(); closeDrawer(); };
+    document.getElementById('drawerLogout').onclick = (e) => { e.preventDefault(); handleLogout(); closeDrawer(); };
+</script>
+</body>
+</html>

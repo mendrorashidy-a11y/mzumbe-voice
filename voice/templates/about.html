@@ -1,0 +1,293 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us – Mzumbe University | Student Voice</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #0b2b3b 0%, #1a4d5f 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        .top-nav {
+            background: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .logo-area img {
+            max-height: 50px;
+            width: auto;
+        }
+        .logo-area span {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #1e6f5c;
+        }
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .nav-links a {
+            text-decoration: none;
+            color: #1e6f5c;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 40px;
+            transition: 0.2s;
+        }
+        .nav-links a:hover {
+            background: #eef2f3;
+            color: #0e4d3f;
+        }
+        .hero {
+            background: #1e6f5c;
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        .content {
+            padding: 40px;
+        }
+        .about-section {
+            margin-bottom: 40px;
+        }
+        .about-section h2 {
+            color: #1e6f5c;
+            border-left: 5px solid #1e6f5c;
+            padding-left: 20px;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        .about-section p {
+            line-height: 1.7;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.05rem;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+            text-align: center;
+        }
+        .stat-card {
+            background: #f5f7fa;
+            padding: 25px 15px;
+            border-radius: 20px;
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #1e6f5c;
+        }
+        .stat-label {
+            color: #4a5568;
+            font-weight: 500;
+            margin-top: 8px;
+        }
+        .values-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .value-item {
+            background: #f5f7fa;
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
+        }
+        .value-item h3 {
+            color: #1e6f5c;
+            margin-bottom: 10px;
+        }
+        footer {
+            background: #eef2f3;
+            padding: 30px 20px;
+            font-size: 0.85rem;
+            color: #555;
+            text-align: center;
+        }
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .social-links a {
+            color: #1e6f5c;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .social-links a:hover {
+            color: #0e4d3f;
+            text-decoration: underline;
+        }
+        .contact-info {
+            margin-top: 15px;
+            line-height: 1.6;
+        }
+        hr {
+            margin: 15px auto;
+            width: 60px;
+            border: 0;
+            height: 1px;
+            background: #ccc;
+        }
+        @media (max-width: 700px) {
+            .hero h1 { font-size: 1.8rem; }
+            .content { padding: 20px; }
+            .top-nav { flex-direction: column; gap: 15px; }
+            .about-section h2 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Navigation bar (same as contact page) -->
+    <div class="top-nav">
+        <div class="logo-area">
+            <img src="{% static 'images/logo.png' %}" alt="Mzumbe University Logo" onerror="this.style.display='none'">
+            <span>Mzumbe University</span>
+        </div>
+        <div class="nav-links">
+            <a href="{% url 'home' %}">🏠 Home</a>
+            <a href="{% url 'about' %}">📖 About</a>
+            <a href="{% url 'contact' %}">📞 Contact</a>
+            <a href="{% url 'staff_login' %}">👔 Staff Login</a>
+        </div>
+    </div>
+    
+    <!-- Hero section -->
+    <div class="hero">
+        <h1>📖 About Mzumbe University</h1>
+        <p>Excellence in Education, Research, and Public Service since 1953</p>
+    </div>
+    
+    <div class="content">
+        <!-- Mission & Vision -->
+        <div class="about-section">
+            <h2>🎯 Our Mission</h2>
+            <p>Mzumbe University is committed to providing high-quality education, conducting impactful research, and offering professional public service to meet the needs of Tanzania and the global community.</p>
+        </div>
+        
+        <div class="about-section">
+            <h2>✨ Our Vision</h2>
+            <p>To become a world-class university recognized for excellence in management, law, social sciences, and information technology, producing graduates who are innovative, ethical, and socially responsible.</p>
+        </div>
+        
+        <!-- Quick Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">70+</div>
+                <div class="stat-label">Academic Programmes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">12,000+</div>
+                <div class="stat-label">Current Students</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">500+</div>
+                <div class="stat-label">Academic Staff</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">3</div>
+                <div class="stat-label">Campuses</div>
+            </div>
+        </div>
+        
+        <!-- History -->
+        <div class="about-section">
+            <h2>📜 Our History</h2>
+            <p>Mzumbe University started as the Institute of Development Management (IDM) in 1953. In 2001, it was granted full university status by the Government of Tanzania. Today, it operates three campuses: the main campus in Morogoro, the Mbeya Campus College, and the Dar es Salaam Campus College.</p>
+            <p>The university has produced thousands of graduates who serve as leaders in government, private sector, and civil society across Tanzania and beyond.</p>
+        </div>
+        
+        <!-- Core Values -->
+        <div class="about-section">
+            <h2>🌟 Core Values</h2>
+            <div class="values-list">
+                <div class="value-item">
+                    <h3>Integrity</h3>
+                    <p>Upholding honesty and ethical standards in all our activities.</p>
+                </div>
+                <div class="value-item">
+                    <h3>Excellence</h3>
+                    <p>Striving for the highest quality in teaching, research, and service.</p>
+                </div>
+                <div class="value-item">
+                    <h3>Innovation</h3>
+                    <p>Embracing creativity and modern solutions to societal challenges.</p>
+                </div>
+                <div class="value-item">
+                    <h3>Social Responsibility</h3>
+                    <p>Contributing positively to the community and nation.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Leadership message -->
+        <div class="about-section">
+            <h2>🗣️ Vice Chancellor's Message</h2>
+            <p>"Mzumbe University is dedicated to transforming lives through education. We foster an environment where students are empowered to think critically, act ethically, and lead effectively. Join us in shaping a brighter future for Tanzania and the world."</p>
+            <p style="margin-top: 10px;"><strong>— Prof. William John Mwegoha</strong><br>Vice Chancellor, Mzumbe University</p>
+        </div>
+    </div>
+    
+    <!-- Footer (same as contact page) -->
+    <footer>
+        <div class="social-links">
+            <a href="https://facebook.com/mzumbeuniversity" target="_blank">📘 Facebook</a>
+            <a href="https://instagram.com/mzumbeuniversity" target="_blank">📷 Instagram</a>
+            <a href="mailto:studentvoice@mzumbe.ac.tz">✉️ Email</a>
+            <a href="tel:+255123456789">📞 Phone +255 123 456 789</a>
+        </div>
+        <div class="contact-info">
+            <strong>Support:</strong> <a href="mailto:support@mzumbe.ac.tz">support@mzumbe.ac.tz</a>
+        </div>
+        <hr>
+        <p>&copy; 2025 Mzumbe University – All suggestions are handled according to university policy.</p>
+    </footer>
+</div>
+</body>
+</html>
