@@ -12,7 +12,8 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('about/', views.about, name='about'),
     path('contact/', views.contact, name='contact'),
-    path('health/', views.health_check, name='health_check'),   # NEW: health check for uptime monitoring
+    path('health/', views.health_check, name='health_check'),   # health check for uptime monitoring
+    path('qr-code/', views.generate_qr_code, name='qr_code'),   # QR code generator
     
     # Staff login (shared for all staff: VC, director, HOD, admin)
     path('staff/login/', views.staff_login, name='staff_login'),

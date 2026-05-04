@@ -7,6 +7,8 @@ from django.db import models
 from django.utils import timezone
 import json
 import os
+import qrcode                         # <-- added for QR code
+from io import BytesIO                # <-- added for QR code
 
 from .models import Suggestion, Faculty, User
 from django.core.files.storage import default_storage
@@ -639,7 +641,7 @@ def accommodation_feedback_suggestion(request, sug_id):
             return JsonResponse({'ok': False, 'error': str(e)})
     return JsonResponse({'ok': False, 'error': 'Invalid method'})
 
-# ========== VC Edit, Update, Delete views (added) ==========
+# ========== VC Edit, Update, Delete views ==========
 @login_required
 @user_passes_test(is_vc)
 def vice_edit_suggestion(request, sug_id):
@@ -690,3 +692,16 @@ def vice_delete_suggestion(request, sug_id):
 def health_check(request):
     """Simple health check endpoint for uptime monitoring."""
     return HttpResponse("OK", content_type="text/plain")
+
+# ========== QR Code Generation ==========
+def generate_qr_code(request):
+    """Return a QR code image for the Mzumbe Voice website."""
+    url = "https://mzumbe-voice.onrender.com/"   # change if your URL is different
+    qr = qrcode.QRCode(version=1, box_size=10, border=4)
+    qr.add_data(url)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+    buffer = BytesIO()
+    img.save(buffer, format="PNG")
+    buffer.seek(0)
+    return HttpResponse(buffer, content_type="image/png")
