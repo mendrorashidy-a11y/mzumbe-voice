@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.core import validators  # <-- added for custom validator
 from django.conf import settings
 
 # ==============================
@@ -24,6 +25,23 @@ class Faculty(models.Model):
 # 2. Custom User (extends Django's AbstractUser)
 # ==============================
 class User(AbstractUser):
+    # Override username to allow slash (/) and other safe characters
+    username = models.CharField(
+        max_length=150,
+        unique=True,
+        help_text='Required. Letters, digits, slash (/), dot (.), underscore (_), and hyphen (-) only.',
+        validators=[
+            validators.RegexValidator(
+                regex=r'^[\w./-]+$',   # allows letters, digits, underscore, slash, dot, hyphen
+                message='Username can only contain letters, digits, slash (/), dot (.), underscore (_), and hyphen (-).',
+                code='invalid'
+            )
+        ],
+        error_messages={
+            'unique': "A user with that username already exists.",
+        }
+    )
+
     ROLE_CHOICES = [
         ('student', 'Student'),
         ('admin', 'Admin'),
@@ -96,7 +114,7 @@ class Suggestion(models.Model):
         ('academic', 'Academic'),
         ('technical', 'Technical'),
         ('other', 'Other'),
-        ('accommodation', 'Accommodation'),   # ← accommodation category
+        ('accommodation', 'Accommodation'),
     ]
     VISIBILITY_CHOICES = [
         ('confidential', 'Confidential'),
